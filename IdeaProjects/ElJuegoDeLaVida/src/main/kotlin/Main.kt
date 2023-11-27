@@ -11,8 +11,8 @@ import kotlin.math.min
  */
 class BaseDatos {
     private val url = "jdbc:mysql://localhost:3306/curso_sql"
-    private val usuario = ""
-    private val contrasena = ""
+    private val usuario = "root"
+    private val contrasena = "1234"
 
     /**
      * Me dispongo a crear las tablas 'Generaciones' y 'Celulas' en la base de datos.
@@ -196,16 +196,13 @@ class GameOfLife(val filas: Int, val columnas: Int) {
                 val aliveNeighbors = countAliveNeighbors(i, j)
                 if (previousBoard[i][j]) {
                     newBoard[i][j] = aliveNeighbors == 2 || aliveNeighbors == 3
-                    if (newBoard[i][j]) {
-                        numCelulasVivas++
-                    } else {
-                        numCelulasMuertas++
-                    }
                 } else {
                     newBoard[i][j] = aliveNeighbors == 3
-                    if (newBoard[i][j]) {
-                        numCelulasVivas++
-                    }
+                }
+                if (newBoard[i][j]) {
+                    numCelulasVivas++
+                } else {
+                    numCelulasMuertas++
                 }
             }
         }
@@ -216,7 +213,6 @@ class GameOfLife(val filas: Int, val columnas: Int) {
 
         return Pair(numCelulasVivas, numCelulasMuertas)
     }
-
 
     /**
      * Para recuperar objetos de la tabla
@@ -277,7 +273,6 @@ fun main() {
     // Objetos de la clase GameOfLife y de la Base Datos
     val game = GameOfLife(filas = 10, columnas = 10)
     val db = BaseDatos()
-
 
     db.crearTablas()
     game.iniciarTablero()
