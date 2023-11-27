@@ -111,9 +111,3 @@ fun MainMenu(navController: NavController) {
         }
     }
 }
-
-@Preview
-@Composable
-fun MainMenuPreview() {
-
-}

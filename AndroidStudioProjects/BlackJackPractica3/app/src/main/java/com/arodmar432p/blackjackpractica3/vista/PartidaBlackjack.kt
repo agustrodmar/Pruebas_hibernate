@@ -1,34 +1,34 @@
 package com.arodmar432p.blackjackpractica3.vista
 
+
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arodmar432p.blackjackpractica3.vistaModelo.JuegoViewModel
-import java.lang.reflect.Modifier
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arodmar432p.blackjackpractica3.R
-import com.arodmar432p.blackjackpractica3.modelo.Naipe
-import com.arodmar432p.blackjackpractica3.modelo.Palo
+import com.arodmar432p.blackjackpractica3.modelo.Jugador
+import com.arodmar432p.blackjackpractica3.vistaModelo.JuegoViewModel
+
+
 /*val recursos = mapOf(
         "corazonesa" to painterResource(id = R.drawable.corazonesa),
         "corazones2" to painterResource(id = R.drawable.corazones3),
@@ -85,68 +85,93 @@ import com.arodmar432p.blackjackpractica3.modelo.Palo
 
      */
 
+
 @Composable
-fun PartidaBlackjack() {
-    val juegoViewModel: JuegoViewModel = viewModel()
-    val jugadores by juegoViewModel.jugadores.observeAsState(emptyList())
-    val ganador by juegoViewModel.ganador.observeAsState(null)
-    val turnoActual by juegoViewModel.turnoActual.observeAsState(null)
+fun PartidaBlackjack(juegoViewModel: JuegoViewModel) {
+    val imagen = painterResource(id = R.drawable.tapete)
+    val turnoActual by juegoViewModel.turnoActual.observeAsState()
+    val jugadores by juegoViewModel.jugadores.observeAsState()
+    val ganador by juegoViewModel.ganador.observeAsState()
+    val partidaEnCurso = remember { mutableStateOf(true)}
 
-    val recursosBocaAbajo = painterResource(id = R.drawable.bocabajo)
+    // Agrega dos jugadores y inicia la partida
+    LaunchedEffect(Unit) {
+        juegoViewModel.agregarJugador(Jugador("Jugador1"))
+        juegoViewModel.agregarJugador(Jugador("Jugador2"))
+        juegoViewModel.iniciarPartida()
+    }
 
-    val recursos = Palo.values().flatMap { palo ->
-        Naipe.values().map { naipe ->
-            val nombreRecurso = "${palo.toString().lowercase()}${naipe.valor}"
-            nombreRecurso to painterResource(id = R.drawable::class.java.getField(nombreRecurso).getInt(null))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = imagen,
+            contentDescription = "Fondo de pantalla",
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        turnoActual?.let { jugador ->
+            Text(
+                text = "Turno Jugador: ${jugador.nombre}",
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp)
+            )
         }
-    }.toMap()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Image(painterResource("tapete"), contentDescription = null, modifier = Modifier.fillMaxSize())
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Blackjack", fontSize = 32.sp, color = Color.White)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            jugadores.forEach { jugador ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = jugador.nombre, fontSize = 24.sp, color = Color.White)
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    jugador.mano.forEach { carta ->
-                        val imagen = if (turnoActual == jugador || ganador != null) {
-                            painterResource(carta.imagen)
-                        } else {
-                            painterResource("bocabajo")
-                        }
-                        Image(imagen, contentDescription = null)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = { turnoActual?.let { juegoViewModel.pedirCarta(it) } },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                border = BorderStroke(2.dp, Color.White),
+                modifier = Modifier
+                    .sizeIn(minWidth = 200.dp, minHeight = 50.dp)
+                    .padding(8.dp)
+            ) {
+                Text("Pedir Carta")
             }
 
-            if (ganador != null) {
-                Text(text = "Ganador: ${ganador!!.nombre}", fontSize = 24.sp, color = Color.White)
+            Button(
+                onClick = {
+                    juegoViewModel.pasarTurno()
+                    if (ganador != null) {
+                        partidaEnCurso.value = false
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                border = BorderStroke(2.dp, Color.White),
+                modifier = Modifier
+                    .sizeIn(minWidth = 200.dp, minHeight = 50.dp)
+                    .padding(8.dp)
+            ) {
+                Text("Plantarse")
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(onClick = { juegoViewModel.reiniciarPartida() }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)), border = BorderStroke(2.dp, Color.White), modifier = Modifier.sizeIn(minWidth = 200.dp, minHeight = 50.dp)) {
-                    Text(text = "Reiniciar partida")
-                }
-            } else {
-                Button(onClick = { turnoActual?.let { juegoViewModel.pedirCarta(it) } }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)), border = BorderStroke(2.dp, Color.White), modifier = Modifier.sizeIn(minWidth = 200.dp, minHeight = 50.dp)) {
-                    Text(text = "Pedir carta")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(onClick = { juegoViewModel.pasarTurno() }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)), border = BorderStroke(2.dp, Color.White), modifier = Modifier.sizeIn(minWidth = 200.dp, minHeight = 50.dp)) {
-                    Text(text = "Pasar turno")
+            if (!partidaEnCurso.value) {
+                Button(
+                    onClick = { juegoViewModel.reiniciarPartida() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                    border = BorderStroke(2.dp, Color.White),
+                    modifier = Modifier
+                        .sizeIn(minWidth = 200.dp, minHeight = 50.dp)
+                        .padding(8.dp)
+                ) {
+                    Text("Reiniciar Partida")
                 }
             }
         }
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun PartidaBlackjackPreview() {
+    val juegoViewModel = JuegoViewModel(mapOf("recurso1" to R.drawable.recurso1, "recurso2" to R.drawable.recurso2), mapOf("recurso1" to R.drawable.recurso1, "recurso2" to R.drawable.recurso2))
+    juegoViewModel.agregarJugador(Jugador("Jugador1"))
+    juegoViewModel.agregarJugador(Jugador("Jugador2"))
+    PartidaBlackjack(juegoViewModel)
 }

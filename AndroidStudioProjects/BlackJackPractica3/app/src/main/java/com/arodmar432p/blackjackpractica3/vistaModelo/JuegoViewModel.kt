@@ -24,11 +24,7 @@ class JuegoViewModel(private val recursos: Map<String, Int>, private val recurso
     }
 
     fun agregarJugador(jugador: Jugador) {
-        if (_jugadores.value?.size ?: 0 < 2) {
-            _jugadores.value = _jugadores.value?.plus(jugador)
-        } else {
-            throw IllegalStateException("No se pueden agregar más de dos jugadores")
-        }
+        _jugadores.value = _jugadores.value?.plus(jugador)
     }
 
     fun iniciarPartida() {
