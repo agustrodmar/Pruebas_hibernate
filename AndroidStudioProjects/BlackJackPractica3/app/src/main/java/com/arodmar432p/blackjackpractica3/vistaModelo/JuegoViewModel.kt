@@ -43,7 +43,9 @@ class JuegoViewModel(private val recursos: Map<String, Int>, private val recurso
     fun repartirCartas(numCartas: Int) {
         for (i in 0 until numCartas) {
             for (jugador in _jugadores.value!!) {
-                jugador.mano.add(baraja.dameCarta())
+                val carta = baraja.dameCarta()
+                carta.estaBocaAbajo = true  // Las cartas se reparten boca abajo
+                jugador.mano.add(carta)
             }
         }
     }
@@ -78,9 +80,9 @@ class JuegoViewModel(private val recursos: Map<String, Int>, private val recurso
 
 
     fun pedirCarta(jugador: Jugador) {
-        // El jugador recibe una carta de la baraja
-        val nuevaCarta = baraja.dameCarta()
-        jugador.mano.add(nuevaCarta)
+        val carta = baraja.dameCarta()
+        carta.estaBocaAbajo = false  // Las cartas que se piden se muestran boca arriba
+        jugador.mano.add(carta)
 
         // Comprueba si el jugador se ha pasado de 21
         if (calcularPuntos(jugador.mano) > 21) {
@@ -89,7 +91,7 @@ class JuegoViewModel(private val recursos: Map<String, Int>, private val recurso
         }
     }
 
-    private fun calcularPuntos(mano: List<Carta>): Int {
+    fun calcularPuntos(mano: List<Carta>): Int {
         var total = 0
         var ases = 0
 

@@ -6,5 +6,6 @@ data class Carta(
     val imagen: Int,
     val puntosMax: Int,
     val idDrawable: Int,
-    val imagenBocaAbajo: Int
+    val imagenBocaAbajo: Int,
+    var estaBocaAbajo: Boolean = true
 )

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,66 +25,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.arodmar432p.blackjackpractica3.R
+import com.arodmar432p.blackjackpractica3.modelo.BlackjackRoutes
+import com.arodmar432p.blackjackpractica3.modelo.Carta
 import com.arodmar432p.blackjackpractica3.modelo.Jugador
+import com.arodmar432p.blackjackpractica3.ui.theme.BlackJackPractica3Theme
 import com.arodmar432p.blackjackpractica3.vistaModelo.JuegoViewModel
-
-
-/*val recursos = mapOf(
-        "corazonesa" to painterResource(id = R.drawable.corazonesa),
-        "corazones2" to painterResource(id = R.drawable.corazones3),
-        "corazones3" to painterResource(id = R.drawable.corazones4),
-        "corazones5" to painterResource(id = R.drawable.corazones5),
-        "corazones6" to painterResource(id = R.drawable.corazones6),
-        "corazones7" to painterResource(id = R.drawable.corazones7),
-        "corazones8" to painterResource(id = R.drawable.corazones8),
-        "corazones9" to painterResource(id = R.drawable.corazones9),
-        "corazonesj" to painterResource(id = R.drawable.corazonesj),
-        "corazonesq" to painterResource(id = R.drawable.corazonesq),
-        "corazonesk" to painterResource(id = R.drawable.corazonesk),
-        "diamantesa" to painterResource(id = R.drawable.diamantesa),
-        "diamantes2" to painterResource(id = R.drawable.diamantes2),
-        "diamantes3" to painterResource(id = R.drawable.diamantes3),
-        "diamantes4" to painterResource(id = R.drawable.diamantes4),
-        "diamantes5" to painterResource(id = R.drawable.diamantes5),
-        "diamantes5" to painterResource(id = R.drawable.diamantes6),
-        "diamantes6" to painterResource(id = R.drawable.diamantes7),
-        "diamantes7" to painterResource(id = R.drawable.diamantes8),
-        "diamantes8" to painterResource(id = R.drawable.diamantes9),
-        "diamantes9" to painterResource(id = R.drawable.diamantes10),
-        "diamantesj" to painterResource(id = R.drawable.diamantesj),
-        "diamantesq" to painterResource(id = R.drawable.diamantesq),
-        "diamantesk" to painterResource(id = R.drawable.diamantesk),
-        "picasa" to painterResource(id = R.drawable.picasa),
-        "picas2" to painterResource(id = R.drawable.picas2),
-        "picas3" to painterResource(id = R.drawable.picas3),
-        "picas4" to painterResource(id = R.drawable.picas4),
-        "picas5" to painterResource(id = R.drawable.picas5),
-        "picas6" to painterResource(id = R.drawable.picas6),
-        "picas7" to painterResource(id = R.drawable.picas7),
-        "picas8" to painterResource(id = R.drawable.picas8),
-        "picas9" to painterResource(id = R.drawable.picas9),
-        "picas10" to painterResource(id = R.drawable.picas10),
-        "picasj" to painterResource(id = R.drawable.picasj),
-        "picasq" to painterResource(id = R.drawable.picasq),
-        "picasak" to painterResource(id = R.drawable.picask),
-        "trebolesa" to painterResource(id = R.drawable.trebolesa),
-        "treboles2" to painterResource(id = R.drawable.treboles2),
-        "treboles3" to painterResource(id = R.drawable.treboles3),
-        "treboles4" to painterResource(id = R.drawable.treboles4),
-        "treboles5" to painterResource(id = R.drawable.treboles5),
-        "treboles6" to painterResource(id = R.drawable.treboles6),
-        "treboles7" to painterResource(id = R.drawable.treboles7),
-        "treboles8" to painterResource(id = R.drawable.treboles8),
-        "treboles9" to painterResource(id = R.drawable.treboles9),
-        "treboles10" to painterResource(id = R.drawable.treboles10),
-        "trebolesj" to painterResource(id = R.drawable.trebolesj),
-        "trebolesq" to painterResource(id = R.drawable.trebolesq),
-        "trebolesk" to painterResource(id = R.drawable.trebolesk)
-
-    )
-
-     */
 
 
 @Composable
@@ -94,7 +42,7 @@ fun PartidaBlackjack(juegoViewModel: JuegoViewModel) {
     val ganador by juegoViewModel.ganador.observeAsState()
     val partidaEnCurso = remember { mutableStateOf(true)}
 
-    // Agrega dos jugadores y inicia la partida
+    // Agrega dos jugadores e inicia la partida
     LaunchedEffect(Unit) {
         juegoViewModel.agregarJugador(Jugador("Jugador1"))
         juegoViewModel.agregarJugador(Jugador("Jugador2"))
@@ -117,6 +65,37 @@ fun PartidaBlackjack(juegoViewModel: JuegoViewModel) {
                     .align(Alignment.TopStart)
                     .padding(16.dp)
             )
+        }
+
+        jugadores?.let { listaJugadores ->
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                listaJugadores.forEach { jugador ->
+                    Text(
+                        text = "${jugador.nombre}: ${juegoViewModel.calcularPuntos(jugador.mano)} puntos",
+                        color = Color.White,
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+                    jugador.mano.forEach { carta ->
+                        val imagen = if (carta.estaBocaAbajo) {
+                            painterResource(id = carta.imagenBocaAbajo)
+                        } else {
+                            painterResource(id = carta.idDrawable)
+                        }
+
+                        Image(
+                            painter = imagen,
+                            contentDescription = "Imagen de la carta",
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                }
+            }
         }
 
         Column(
@@ -153,6 +132,15 @@ fun PartidaBlackjack(juegoViewModel: JuegoViewModel) {
             }
 
             if (!partidaEnCurso.value) {
+                Text(
+                    text = "¡${ganador?.nombre} ha ganado la partida con ${ganador?.let {
+                        juegoViewModel.calcularPuntos(
+                            it.mano)
+                    }} puntos!",
+                    color = Color.White,
+                    modifier = Modifier.padding(16.dp)
+                )
+
                 Button(
                     onClick = { juegoViewModel.reiniciarPartida() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
@@ -167,11 +155,14 @@ fun PartidaBlackjack(juegoViewModel: JuegoViewModel) {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PartidaBlackjackPreview() {
-    val juegoViewModel = JuegoViewModel(mapOf("recurso1" to R.drawable.recurso1, "recurso2" to R.drawable.recurso2), mapOf("recurso1" to R.drawable.recurso1, "recurso2" to R.drawable.recurso2))
-    juegoViewModel.agregarJugador(Jugador("Jugador1"))
-    juegoViewModel.agregarJugador(Jugador("Jugador2"))
-    PartidaBlackjack(juegoViewModel)
+    val turnoActual = remember { mutableStateOf(Jugador("Jugador1")) }
+    val jugadores = remember { mutableStateOf(listOf(Jugador("Jugador1"), Jugador("Jugador2"))) }
+    val ganador = remember { mutableStateOf<Jugador?>(null) }
+    val partidaEnCurso = remember { mutableStateOf(true) }
+
+    PartidaBlackjack(turnoActual, jugadores, ganador, partidaEnCurso)
 }
