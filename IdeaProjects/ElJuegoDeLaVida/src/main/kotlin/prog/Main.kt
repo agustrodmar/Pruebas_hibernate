@@ -1,3 +1,5 @@
+package prog
+
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -12,7 +14,7 @@ import kotlin.math.min
 class BaseDatos {
     private val url = "jdbc:mysql://localhost:3306/curso_sql"
     private val usuario = "root"
-    private val contrasena = "1234"
+    private val contrasena = "root"
 
     /**
      * Me dispongo a crear las tablas 'Generaciones' y 'Celulas' en la base de datos.
